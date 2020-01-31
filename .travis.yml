@@ -1,10 +1,27 @@
+
+sudo: required
 language: java
+
 jdk:
-  - oraclejdk8
-before_install:
-  - pip install --user codecov
-after_success:
-  - codecov
-branches:
-  except:
-    - appveyor
+  - openjdk8
+
+script:
+  - mvn clean compile assembly:single
+
+before_deploy:
+    - mkdir MiningBuild
+    - find . -name '*.jar' -exec cp {} ./MiningBuild \;
+    - cd /home/travis/build/build-test-conflicts/druid/MiningBuild
+    - tar -zcvf result.tar.gz *
+deploy:
+  provider: releases
+  api_key:
+    secure: $GITHUB_TOKEN
+  file: result.tar.gz
+  name: fetchjar-b89ad12d58597f47c2ec063b5b8d76e4db5594bd
+  file_glob: true
+  overwrite: true
+  skip_cleanup: true
+  on:
+    all_branches: true 
+            
